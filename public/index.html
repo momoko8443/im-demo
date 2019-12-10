@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<script
+  src="https://code.jquery.com/jquery-3.4.1.min.js"
+  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+  crossorigin="anonymous"></script>
+  <script src="https://cdn.bootcss.com/socket.io/2.3.0/socket.io.slim.js"></script>
+<body>
+    <div id="who">
+        <span>Who are you?</span>
+        <select id="whoiam" >
+            <option disabled selected>---please choose---</option>
+            <option>UserA</option>
+            <option>UserB</option>
+            <option>UserC</option>
+            <option>UserD</option>
+        </select>
+        <button id="confirmUsername">Enter Chat Room</button>
+    </div>
+    <div id="main">
+        <div id="chatWindow">
+        </div>
+        <br>
+        <div class="toolbar">
+            <div class="selector">
+                <span>From:</span>
+                <span id="fromUsername"></span>
+            </div>
+            <div class="selector">
+                <span>To:</span>
+                <select id="toUsername">
+                    <option disabled selected>---please choose---</option>
+                    <option>UserA</option>
+                    <option>UserB</option>
+                    <option>UserC</option>
+                    <option>UserD</option>
+                    <option>Group_1</option>
+                    <option>Group_2</option>
+                </select>
+            </div>
+        </div>
+        <div>
+            <input type="text" id="messageInput">
+            <button id="sendBtn">Send</button>
+        </div>
+    </div>
+</body>
+<style>
+    #chatWindow{
+        width: 400px;
+        height: 400px;
+        border: 1px solid grey;
+        overflow-y:scroll;
+
+    }
+    #messageInput{
+        width: 400px;
+    }
+    .toolbar{
+        display: flex;
+        justify-content: flex-start;
+    }
+    .selector{
+        margin-right: 20px;
+    }
+    .othersMsg{
+        text-align: left;
+        margin: 10px;
+    }
+    .yourMsg{
+        text-align: right;
+        margin: 10px;
+    }
+</style>
+<script>
+    var socket = io('http://localhost:3000');
+    var fromUsername = '';
+    var toUsername = '';
+    $(document).ready(function(){
+        $('#main').hide();
+        $('#who').show();
+        $('#confirmUsername').click(function(){
+            let who = $('#whoiam').val();
+            //alert(who);
+            fromUsername = who;
+            $('#who').hide();
+            $('#main').show();
+            $('#fromUsername').text(fromUsername);
+            $('#toUsername').change(function(e){
+                toUsername = $(e.currentTarget).val();
+                if(toUsername === fromUsername){
+                    alert('Couldn\'t choose yourself' );
+                }else{
+                    loadHistoryMessages(loadUnreadMessagesFromMe);
+                }
+            });
+            $('#sendBtn').click(()=>{
+                const message = $('#messageInput').val();
+                sendMessage(message,()=>{
+
+                });
+            });
+           
+            socket.emit('login',{username: who});
+            socket.on('unreadMessage',function(data){
+                //loadUnreadMessagesToMe();
+                console.log(JSON.stringify(data));
+                updateChatWindow([data]);
+                markHasRead(data.from,data.to);
+            });
+        })
+    });
+
+    function loadHistoryMessages(){
+        $.get('http://localhost:3000/messages',{from:fromUsername,to:toUsername}, function(result){
+            if(result){
+                clearChatWindow();
+                updateChatWindow(result);
+            }
+            loadUnreadMessagesFromMe();
+        });
+    }
+
+    function loadUnreadMessagesFromMe(){
+        $.get('http://localhost:3000/messages/unread',{from:fromUsername,to:toUsername}, function(result){
+            if(result){
+                updateChatWindow(result);
+            }
+            loadUnreadMessagesToMe();
+        });
+    }
+    function loadUnreadMessagesToMe(){
+        $.get('http://localhost:3000/messages/unread',{from:toUsername,to:fromUsername}, function(result){
+            if(result){
+                updateChatWindow(result);
+                markHasRead(fromUsername,toUsername);
+            }
+        });
+    }
+    function markHasRead(from,to){
+        $.ajax({
+            url:'http://localhost:3000/messages/unread?from='+to+'&to='+from,
+            type:'DELETE',
+            success: function(data){
+                console.log('read messages');
+            }
+        });
+    }
+    function sendMessage(message){
+        $.ajax(
+            {
+                url:'http://localhost:3000/messages',
+                type: "post",
+                contentType : "application/json",
+                data: JSON.stringify({from:fromUsername,to:toUsername,content:message}),
+                dataType: "json",
+                success:function(result){
+                    $('#messageInput').val('');
+                    updateChatWindow([{from:fromUsername,to:toUsername,content:message}]);
+                }
+            });
+    }
+
+    function updateChatWindow(messages){
+        messages.forEach((msg)=>{
+            if(msg.from.toLowerCase() === fromUsername.toLowerCase()){
+                $('#chatWindow').append('<div class="yourMsg">' + 'you: ' + msg.content + '</div>');
+            }else{
+                $('#chatWindow').append('<div class="othersMsg">' + toUsername + ': ' + msg.content + '</div>');
+            }
+            $('#chatWindow').scrollTop($("#chatWindow")[0].scrollHeight);
+        });
+    }
+
+    function clearChatWindow(){
+        $('#chatWindow').empty();
+    }
+
+
+    function listenUnreadMessages(){
+        socket.on('unreadmessage_'+fromUsername.toLowerCase(), (msg)=>{
+            console.log(msg);
+        });
+    }
+</script>
+</html>
