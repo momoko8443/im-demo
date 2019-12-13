@@ -3,7 +3,7 @@ const queueName = 'thread-im';
 
 function Sender(){
     let messageChannel;
-    amqp.connect('amqp://localhost',(error0, connection)=>{
+    amqp.connect('amqp://guest:guest@localhost/my_vhost',(error0, connection)=>{
         if(error0){
             throw error0;
         }
