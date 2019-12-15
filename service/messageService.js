@@ -39,7 +39,7 @@ router.delete('/unread', (req, res) => {
 router.post('/', (req, res) => {
     let msg = req.body;
     sender.sendMessage(msg.from, msg.to, msg.content);
-    res.send({});
+    res.send(msg);
 })
 
 module.exports = router;
