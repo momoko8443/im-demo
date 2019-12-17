@@ -9,6 +9,9 @@ router.get('/', (req, res) => {
     const from = req.query.from;
     const to = req.query.to;
     historyStore.queryMessages(from ,to).then((result)=>{
+        if(!result){
+            result = [];
+        }
         res.send(result);
     });
 })
@@ -17,6 +20,9 @@ router.get('/unread', (req, res) => {
     const from = req.query.from;
     const to = req.query.to;
     unreadStore.queryMessages(from,to).then((result)=>{
+        if(!result){
+            result = [];
+        }
         res.send(result);
     });
 })
