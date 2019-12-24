@@ -174,7 +174,7 @@
             }else{
                 $('#chatWindow').append('<div class="othersMsg">' + toUsername + ': ' + msg.content + '</div>');
             }
-            $('#chatWindow').scrollTop($("#chatWindow")[0].scrollHeight);
+            $('#chatWindow').scrollTop($("#chatWindow")[0].scrollHeight + 100);
         });
     }
 
