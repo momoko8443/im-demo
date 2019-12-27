@@ -21,7 +21,7 @@ function Notifier(http){
             console.log('unreadMessage to', data.username);
             let userSocketId = onlineUserPool2[data.username];
             if(userSocketId){
-                socket.to(userSocketId).emit('unreadMessage',data.message);
+                socket.to(userSocketId).emit('unreadMessage',data);
             }
         })
     });

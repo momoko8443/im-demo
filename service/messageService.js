@@ -44,7 +44,7 @@ router.delete('/unread', (req, res) => {
 
 router.post('/', (req, res) => {
     let msg = req.body;
-    sender.sendMessage(msg.from, msg.to, msg.content);
+    sender.sendMessage(msg.from, msg.to, msg.content,msg.isGroup);
     res.send(msg);
 })
 

@@ -7,16 +7,11 @@ function UnreadStore() {
         console.log('redis connect successfully'); 
     });
 
-    this.appendMessage = function(from, to, content, time){
+    this.appendMessage = function(from, to, messageBody){
         from = from.toLowerCase();
         to = to.toLowerCase();
         const key = to;
-        const body = {
-            'from': from,
-            'to': to,
-            'content': content,
-            'time': time
-        }
+        const body = messageBody;
         return new Promise( (resolve,reject)=>{
             this.queryMessages(from, to).then((result)=>{
                 if(!result){

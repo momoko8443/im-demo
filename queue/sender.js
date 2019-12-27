@@ -17,11 +17,12 @@ function Sender(){
             messageChannel = channel;
         })
     });
-    this.sendMessage = function(from, to, content){
+    this.sendMessage = function(from, to, content, isGroup){
         const msgBody = {
             'from': from,
             'to': to,
             'content': content,
+            'isGroup': isGroup ? true: false,
             'time': Date.now()
         };
         const msgString = JSON.stringify(msgBody);

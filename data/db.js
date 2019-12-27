@@ -7,14 +7,17 @@ module.exports = {
     },
     groups:{
         'group_1':[
-            'usera',
-            'userb',
-            'userc'
+            'user_a',
+            'user_b',
+            'user_c'
         ],
         'group_2':[
-            'userb',
-            'userc',
-            'userd'
+            'user_b',
+            'user_c',
+            'user_d'
         ]
+    },
+    getMembersByGroup(groupName){
+        return this.groups[groupName] ? this.groups[groupName] : [];
     }
 }

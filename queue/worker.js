@@ -1,6 +1,7 @@
 const amqp = require('amqplib/callback_api');
 const unreadStore = require('../storage/unreadStore');
 const queueName = 'thread-im';
+const db = require('../data/db');
 const socket = require('socket.io-client')('http://localhost:3000');
 function Worker(){
     socket.emit('login',{username:'worker'});
@@ -20,10 +21,33 @@ function Worker(){
             channel.consume(queueName, (msg)=>{
                 console.log(" [x] Received %s", msg.content.toString());
                 const body = JSON.parse(msg.content.toString());
-                unreadStore.appendMessage(body.from, body.to,body.content, body.time).then((result)=>{
-                    console.log('record message to unreade storage');
-                    socket.emit('unreadMessage',{username: body.to.toLowerCase(), message:body});
-                });
+                const isGroup = body.isGroup;
+                if(isGroup){
+                    const groupName = body.to;
+                    const members = db.getMembersByGroup(groupName);
+                    for (let i = 0; i < members.length; i++) {
+                        const member = members[i];
+                        if(member !== body.from){
+                            const msgBody = {
+                                from: body.from,
+                                to: member,
+                                content:body.content,
+                                time: body.time
+                            };
+                            (function(from, to, message){
+                                unreadStore.appendMessage(from, to , message).then((result)=>{
+                                    console.log('record message to unreade storage');
+                                    socket.emit('unreadMessage',{username:member, from: from,message:message});
+                                });
+                            })(groupName,member,msgBody);
+                        }    
+                    }
+                }else{
+                    unreadStore.appendMessage(body.from, body.to,body).then((result)=>{
+                        console.log('record message to unreade storage');
+                        socket.emit('unreadMessage',{username: body.to.toLowerCase(), from:body.from ,message:body});
+                    });
+                }   
             }, 
             {
                 noAck: true
