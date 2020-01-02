@@ -7,20 +7,14 @@ function HistoryStore() {
         console.log('redis connect successfully'); 
     });
 
-    this.appendMessage = function(from, to, content, time){
+    this.appendMessage = function(from, to, messageBody){
         const key = generateKey(from,to);
-        const body = {
-            'from': from,
-            'to': to,
-            'content': content,
-            'time': time
-        }
+        const body = messageBody;
         return new Promise( (resolve,reject)=>{
             client.rpush(key, JSON.stringify(body), (err, data) => {
                 if(err){
                     reject(err);
                 }else{
-                    //console.log(data);
                     resolve(data);
                 } 
             })

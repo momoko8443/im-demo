@@ -27,20 +27,20 @@ function Worker(){
                     const members = db.getMembersByGroup(groupName);
                     for (let i = 0; i < members.length; i++) {
                         const member = members[i];
-                        if(member !== body.from){
-                            const msgBody = {
-                                from: body.from,
-                                to: member,
-                                content:body.content,
-                                time: body.time
-                            };
-                            (function(from, to, message){
-                                unreadStore.appendMessage(from, to , message).then((result)=>{
-                                    console.log('record message to unreade storage');
+                        const msgBody = {
+                            from: body.from,
+                            to: member,
+                            content:body.content,
+                            time: body.time
+                        };
+                        (function(from, to, message){
+                            unreadStore.appendMessage(from, to , message).then((result)=>{
+                                console.log('record message to unreade storage');
+                                if(to !== msgBody.from){
                                     socket.emit('unreadMessage',{username:member, from: from,message:message});
-                                });
-                            })(groupName,member,msgBody);
-                        }    
+                                }
+                            });
+                        })(groupName,member,msgBody); 
                     }
                 }else{
                     unreadStore.appendMessage(body.from, body.to,body).then((result)=>{
