@@ -3,9 +3,10 @@ const unreadStore = require('../storage/unreadStore');
 const queueName = 'thread-im';
 const db = require('../data/db');
 const socket = require('socket.io-client')('http://localhost:3000');
+const RABBITMQ_URL = process.env.RABBITMQ_URL || 'guest:guest@localhost';
 function Worker(){
     socket.emit('login',{username:'worker'});
-    amqp.connect('amqp://guest:guest@localhost/my_vhost', (error0, connection)=>{
+    amqp.connect('amqp://' + RABBITMQ_URL, (error0, connection)=>{
         if(error0){
             throw error0;
         }
@@ -55,4 +56,5 @@ function Worker(){
         });
     });
 }
-module.exports = new Worker();
+//module.exports = new Worker();
+module.exports = Worker;

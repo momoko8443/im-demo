@@ -1,10 +1,10 @@
 const express = require('express');
-const sender = require('../queue/sender');
-const worker = require('../queue/worker');
+const Sender = require('../queue/sender');
+const Worker = require('../queue/worker');
 const historyStore = require('../storage/historyStore');
 const unreadStore = require('../storage/unreadStore');
 const router = express.Router();
-
+const sender = new Sender();
 router.get('/', (req, res) => {
     const from = req.query.from;
     const to = req.query.to;

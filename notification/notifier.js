@@ -2,7 +2,7 @@ const socketIO = require("socket.io");
 function Notifier(http){
     let onlineUserPool = {}; //{socket.id: username}
     let onlineUserPool2 = {};// {username: socket.id}
-    this.io = socketIO(http);
+    this.io = socketIO.listen(http);
     this.io.on("connection", (socket) => {
         console.log('user connected',socket.id);
         socket.on("disconnect", () => { 
