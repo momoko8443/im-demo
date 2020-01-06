@@ -1,6 +1,5 @@
 const express = require('express');
 const Sender = require('../queue/sender');
-const Worker = require('../queue/worker');
 const historyStore = require('../storage/historyStore');
 const unreadStore = require('../storage/unreadStore');
 const router = express.Router();
